@@ -1,7 +1,7 @@
-import { View, Text, Button, TextInput, TouchableOpacity, Alert, ToastAndroid } from 'react-native';
+import { View, Text, Button, TextInput, TouchableOpacity, Alert, ToastAndroid, Animated, Modal } from 'react-native';
 import FlashMessage, { positionStyle } from 'react-native-flash-message';
 import { showMessage } from 'react-native-flash-message';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import dict from '../dict.json';
 
@@ -9,68 +9,146 @@ import dict from '../dict.json';
 export default function HomeScreen({ navigation }) {
 
   const [linha, setLinha] = useState(0);
-  const initialViewCount = 5; // Número inicial de Views
+  const initialViewCount = 5;
+  const [gameOver, setGameOver] = useState(false);
+  // Número inicial de Views
+
+  const [modalVisible, setModalVisible] = useState(false);
+
 
   const [rowSet, setRowSet] = useState([0, 0, 0, 0, 0]);
   const [inputText, setInputText] = useState(['', '', '', '', '']);
-
   const [rowSet1, setRowSet1] = useState([0, 0, 0, 0, 0]);
   const [inputText1, setInputText1] = useState(['', '', '', '', '']);
+  const [rowSet2, setRowSet2] = useState([0, 0, 0, 0, 0]);
+  const [inputText2, setInputText2] = useState(['', '', '', '', '']);
+  const [rowSet3, setRowSet3] = useState([0, 0, 0, 0, 0]);
+  const [inputText3, setInputText3] = useState(['', '', '', '', '']);
+  const [rowSet4, setRowSet4] = useState([0, 0, 0, 0, 0]);
+  const [inputText4, setInputText4] = useState(['', '', '', '', '']);
 
-  const inputList = [inputText, inputText1];
+  const inputList = [inputText, inputText1, inputText2, inputText3, inputText4];
 
   const [views, setViews] = useState(Array.from({ length: initialViewCount }, (_, i) => i));
-  const [isLocked, setIsLocked] = useState(true);
-
-
 
   const [palavraSecreta, setPalavraSecreta] = useState('');
   console.log(palavraSecreta);
 
+  const flipAnim = useRef(new Animated.Value(0)).current;
+
+  const flipCard = () => {
+    Animated.sequence([
+      Animated.timing(flipAnim, {
+        toValue: 1, // Roda até 90 graus
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(flipAnim, {
+        toValue: 0, // Retorna para 0 graus
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const rotateX = flipAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '90deg'], // Rotações de 0 a 180 graus
+  });
+
+  const handleGameOver = () => {
+    setGameOver(true);
+    setModalVisible(true);
+  }
+
+  const handleReset = () => {
+    setGameOver(false);
+    setModalVisible(false);
+    setPalavraSecreta(escolherPalavraAleatoria());
+    setLinha(0);
+    let novoRowSet = [0, 0, 0, 0, 0];
+
+    for (let i = 0; i <= 4; i++) {
+      handleRowSet(novoRowSet, i);
+    }
+
+    for (let i = 0; i <= 4; i++) {
+      for (let j = 0; j <= 4; j++) {
+        handleInputChange(j, '', i);
+      }
+    }
+  }
+
+  const escolherPalavraAleatoria = () => {
+    const indiceAleatorio = Math.floor(Math.random() * dict.palavras.length);
+    return dict.palavras[indiceAleatorio];
+  };
 
   // Palavra secreta
   useEffect(() => {
-    const escolherPalavraAleatoria = () => {
-      const indiceAleatorio = Math.floor(Math.random() * dict.palavras.length);
-      return dict.palavras[indiceAleatorio];
-    };
-
     setPalavraSecreta(escolherPalavraAleatoria());
   }, []);
 
   useEffect(() => {
     console.log("Estado atualizado de rowSet:", rowSet);
+    console.log("Estado atualizado de linha:", linha);
   }, [rowSet]);
 
   const addView = () => {
     setViews([...views, views.length]);
   };
 
-  const handleRowSet = (novoRowSet) => {
-    if (linha == 0) {
+  const handleRowSet = (novoRowSet, ln) => {
+    if (ln == 0) {
       setRowSet(novoRowSet);
     }
-    if (linha == 1) {
+    if (ln == 1) {
       setRowSet1(novoRowSet);
+    }
+    if (ln == 2) {
+      setRowSet2(novoRowSet);
+    }
+    if (ln == 3) {
+      setRowSet3(novoRowSet);
+    }
+    if (ln == 4) {
+      setRowSet4(novoRowSet);
     }
   }
 
-  const updateLinha = () => {
-     let linha
-  }
+  const handleInputChange = (index, value, ln) => {
 
-  const handleInputChange = (index, value) => {
-
-    if (linha === 0) {
+    if (ln === 0) {
       setInputText(inputText => {
         const newInputText = [...inputText];
         newInputText[index] = value;
         return newInputText;
       });
     }
-    if (linha === 1) {
+    if (ln === 1) {
       setInputText1(inputText1 => {
         const newInputText = [...inputText1];
+        newInputText[index] = value;
+        return newInputText;
+      });
+    }
+    if (ln === 2) {
+      setInputText2(inputText2 => {
+        const newInputText = [...inputText2];
+        newInputText[index] = value;
+        return newInputText;
+      });
+    }
+    if (ln === 3) {
+      setInputText3(inputText3 => {
+        const newInputText = [...inputText3];
+        newInputText[index] = value;
+        return newInputText;
+      });
+    }
+    if (ln === 4) {
+      setInputText4(inputText4 => {
+        const newInputText = [...inputText4];
         newInputText[index] = value;
         return newInputText;
       });
@@ -141,8 +219,10 @@ export default function HomeScreen({ navigation }) {
 
     const concatenatedString = actualInput.join('');
     console.log(concatenatedString);
+    console.log(linha);
 
     let textoFormatado = formatarTexto(concatenatedString);
+
 
     if (textoFormatado.length === 5) {
       checkWord(textoFormatado);
@@ -153,6 +233,7 @@ export default function HomeScreen({ navigation }) {
         type: "warning",
       });
     }
+
   }
 
   const checkWord = (word) => {
@@ -164,7 +245,7 @@ export default function HomeScreen({ navigation }) {
       });
 
       novoRowSet = [2, 2, 2, 2, 2];
-      handleRowSet(novoRowSet);
+      handleRowSet(novoRowSet, linha);
     } else {
       const novoRowSet = [...rowSet];
 
@@ -172,11 +253,14 @@ export default function HomeScreen({ navigation }) {
         atualizarRowSet(caractere, index, novoRowSet);
       });
 
-      handleRowSet(novoRowSet);
-
-      //pularLinha
+      handleRowSet(novoRowSet, linha);
+      flipCard();
       let novaLinha = linha + 1;
       setLinha(novaLinha);
+
+      if (linha == 4) {
+        handleGameOver();
+      }
 
       showMessage({
         message: "ERROU!",
@@ -189,59 +273,153 @@ export default function HomeScreen({ navigation }) {
   //VIEW
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+
+
+      <Modal
+        animationType="slide" // Tipo de animação ("slide", "fade" ou "none")
+        transparent={true} // Define o fundo como transparente
+        visible={modalVisible} // Controla a visibilidade do modal
+        onRequestClose={() => setModalVisible(false)} // Fecha o modal ao pressionar o botão de voltar no Android
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>Derrota</Text>
+            <Text style={styles.modalText}>Palavra Secreta: {palavraSecreta}</Text>
+
+            <View style={{ flexDirection: 'row', marginTop: 5 }}>
+              <View style={{ marginRight: 10 }}>
+                <TryButton title="Reinicar" onPress={() => handleReset()} />
+              </View>
+              <TryButton title="Menu" onPress={() => setModalVisible(false)} />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <Text> {palavraSecreta}</Text>
 
       <View style={{ flexDirection: 'row', marginTop: 5 }}>
         {views.map((viewIndex) => (
-          <View
-
+          <Animated.View
             key={viewIndex}
-            style={[getRectangleStyle(rowSet[viewIndex]), { justifyContent: 'center', alignItems: 'center' }]}
+            style={[getRectangleStyle(rowSet[viewIndex]), { justifyContent: 'center', alignItems: 'center' }, linha - 1 == 0 ? { transform: [{ rotateX }] } : {}]}
           >
             <TextInput
               style={[styles.input, { width: '70%', textAlign: 'center' }]}
-              placeholder="-"
+              placeholder=""
               value={inputText[viewIndex] || ''}
               onChangeText={(value) => {
                 // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
                 if (/^[a-zA-Z]*$/.test(value)) {
-                  handleInputChange(viewIndex, value); // Atualiza o estado apenas se for uma letra
+                  handleInputChange(viewIndex, value, linha); // Atualiza o estado apenas se for uma letra
                 }
               }}
               maxLength={1}
               editable={linha == 0}
             />
-          </View>
+          </Animated.View>
         ))}
       </View>
 
       <View style={{ flexDirection: 'row', marginTop: 5 }}>
         {views.map((viewIndex) => (
-          <View
+          <Animated.View
 
             key={viewIndex}
-            style={[getRectangleStyle(rowSet1[viewIndex]), { justifyContent: 'center', alignItems: 'center' }]}
+            style={[getRectangleStyle(rowSet1[viewIndex]), { justifyContent: 'center', alignItems: 'center' }, linha - 1 == 1 ? { transform: [{ rotateX }] } : {}]}
           >
             <TextInput
               style={[styles.input, { width: '70%', textAlign: 'center' }]}
-              placeholder="-"
+              placeholder=""
               value={inputText1[viewIndex] || ''}
               onChangeText={(value) => {
                 // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
                 if (/^[a-zA-Z]*$/.test(value)) {
-                  handleInputChange(viewIndex, value); // Atualiza o estado apenas se for uma letra
+                  handleInputChange(viewIndex, value, linha); // Atualiza o estado apenas se for uma letra
                 }
               }}
               maxLength={1}
               editable={linha == 1}
             />
-          </View>
+          </Animated.View>
+        ))}
+      </View>
+
+      <View style={{ flexDirection: 'row', marginTop: 5 }}>
+        {views.map((viewIndex) => (
+          <Animated.View
+
+            key={viewIndex}
+            style={[getRectangleStyle(rowSet2[viewIndex]), { justifyContent: 'center', alignItems: 'center' }, linha - 1 == 2 ? { transform: [{ rotateX }] } : {}]}
+          >
+            <TextInput
+              style={[styles.input, { width: '70%', textAlign: 'center' }]}
+              placeholder=""
+              value={inputText2[viewIndex] || ''}
+              onChangeText={(value) => {
+                // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
+                if (/^[a-zA-Z]*$/.test(value)) {
+                  handleInputChange(viewIndex, value, linha); // Atualiza o estado apenas se for uma letra
+                }
+              }}
+              maxLength={1}
+              editable={linha == 2}
+            />
+          </Animated.View>
+        ))}
+      </View>
+
+      <View style={{ flexDirection: 'row', marginTop: 5 }}>
+        {views.map((viewIndex) => (
+          <Animated.View
+
+            key={viewIndex}
+            style={[getRectangleStyle(rowSet3[viewIndex]), { justifyContent: 'center', alignItems: 'center' }, linha - 1 == 3 ? { transform: [{ rotateX }] } : {}]}
+          >
+            <TextInput
+              style={[styles.input, { width: '70%', textAlign: 'center' }]}
+              placeholder=""
+              value={inputText3[viewIndex] || ''}
+              onChangeText={(value) => {
+                // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
+                if (/^[a-zA-Z]*$/.test(value)) {
+                  handleInputChange(viewIndex, value, linha); // Atualiza o estado apenas se for uma letra
+                }
+              }}
+              maxLength={1}
+              editable={linha == 3}
+            />
+          </Animated.View>
+        ))}
+      </View>
+
+      <View style={{ flexDirection: 'row', marginTop: 5 }}>
+        {views.map((viewIndex) => (
+          <Animated.View
+
+            key={viewIndex}
+            style={[getRectangleStyle(rowSet4[viewIndex]), { justifyContent: 'center', alignItems: 'center' }, linha - 1 == 4 ? { transform: [{ rotateX }] } : {}]}
+          >
+            <TextInput
+              style={[styles.input, { width: '70%', textAlign: 'center' }]}
+              placeholder=""
+              value={inputText4[viewIndex] || ''}
+              onChangeText={(value) => {
+                // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
+                if (/^[a-zA-Z]*$/.test(value)) {
+                  handleInputChange(viewIndex, value, linha); // Atualiza o estado apenas se for uma letra
+                }
+              }}
+              maxLength={1}
+              editable={linha == 4}
+            />
+          </Animated.View>
         ))}
       </View>
 
 
 
-      <TryButton title="Chutar" onPress={() => checkWordFill()} />
+      <TryButton title="Chutar" onPress={() => !gameOver && checkWordFill()} />
 
       <FlashMessage position="top" />
       {/* Códigos sempre dentro da view */}
@@ -251,8 +429,8 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   rectangle: {
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 60,
     marginHorizontal: 2,
     backgroundColor: '#EFEFEF',
     borderWidth: 2,
@@ -262,8 +440,8 @@ const styles = StyleSheet.create({
   },
 
   rectangleGray: {
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 60,
     marginHorizontal: 2,
     backgroundColor: '#9C9C9C',
     borderWidth: 2,
@@ -273,8 +451,8 @@ const styles = StyleSheet.create({
   },
 
   rectanglePurple: {
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 60,
     marginHorizontal: 2,
     backgroundColor: '#6959CD', // Cor de fundo laranja
     borderWidth: 2,
@@ -284,8 +462,8 @@ const styles = StyleSheet.create({
   },
 
   rectangleGreen: {
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 60,
     marginHorizontal: 2,
     backgroundColor: '#2E8B57', // Cor de fundo verde
     borderWidth: 2,
@@ -316,5 +494,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: 'rgba(0, 0, 0, 0.85)',
+  },
+
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo semi-transparente para sobreposição
+  },
+  modalContent: {
+    position: 'absolute',
+    width: 300,
+    height: 488,
+    backgroundColor: '#D9D9D9',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
