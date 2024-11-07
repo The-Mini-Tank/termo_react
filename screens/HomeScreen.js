@@ -8,16 +8,25 @@ import dict from '../dict.json';
 
 export default function HomeScreen({ navigation }) {
 
-  let linha = 0;
+  const [linha, setLinha] = useState(0);
   const initialViewCount = 5; // Número inicial de Views
+
   const [rowSet, setRowSet] = useState([0, 0, 0, 0, 0]);
   const [inputText, setInputText] = useState(['', '', '', '', '']);
-  const [showInput, setShowInput] = useState(false);
+
+  const [rowSet1, setRowSet1] = useState([0, 0, 0, 0, 0]);
+  const [inputText1, setInputText1] = useState(['', '', '', '', '']);
+
+  const inputList = [inputText, inputText1];
+
   const [views, setViews] = useState(Array.from({ length: initialViewCount }, (_, i) => i));
+  const [isLocked, setIsLocked] = useState(true);
+
 
 
   const [palavraSecreta, setPalavraSecreta] = useState('');
   console.log(palavraSecreta);
+
 
   // Palavra secreta
   useEffect(() => {
@@ -37,12 +46,35 @@ export default function HomeScreen({ navigation }) {
     setViews([...views, views.length]);
   };
 
+  const handleRowSet = (novoRowSet) => {
+    if (linha == 0) {
+      setRowSet(novoRowSet);
+    }
+    if (linha == 1) {
+      setRowSet1(novoRowSet);
+    }
+  }
+
+  const updateLinha = () => {
+     let linha
+  }
+
   const handleInputChange = (index, value) => {
-    setInputText(inputText => {
-      const newInputText = [...inputText];
-      newInputText[index] = value;
-      return newInputText;
-    });
+
+    if (linha === 0) {
+      setInputText(inputText => {
+        const newInputText = [...inputText];
+        newInputText[index] = value;
+        return newInputText;
+      });
+    }
+    if (linha === 1) {
+      setInputText1(inputText1 => {
+        const newInputText = [...inputText1];
+        newInputText[index] = value;
+        return newInputText;
+      });
+    }
   };
 
   const atualizarRowSet = (letra, index, novoRowSet) => {
@@ -103,8 +135,11 @@ export default function HomeScreen({ navigation }) {
   };
 
   const checkWordFill = () => {
-    setShowInput(true);
-    const concatenatedString = inputText.join('');
+
+    //getActualInput
+    let actualInput = inputList[linha];
+
+    const concatenatedString = actualInput.join('');
     console.log(concatenatedString);
 
     let textoFormatado = formatarTexto(concatenatedString);
@@ -129,15 +164,19 @@ export default function HomeScreen({ navigation }) {
       });
 
       novoRowSet = [2, 2, 2, 2, 2];
-      setRowSet(novoRowSet);
+      handleRowSet(novoRowSet);
     } else {
       const novoRowSet = [...rowSet];
 
       word.split('').forEach((caractere, index) => {
         atualizarRowSet(caractere, index, novoRowSet);
       });
-      console.log(novoRowSet);
-      setRowSet(novoRowSet);
+
+      handleRowSet(novoRowSet);
+
+      //pularLinha
+      let novaLinha = linha + 1;
+      setLinha(novaLinha);
 
       showMessage({
         message: "ERROU!",
@@ -163,12 +202,44 @@ export default function HomeScreen({ navigation }) {
               style={[styles.input, { width: '70%', textAlign: 'center' }]}
               placeholder="-"
               value={inputText[viewIndex] || ''}
-              onChangeText={(value) => handleInputChange(viewIndex, value)}
+              onChangeText={(value) => {
+                // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
+                if (/^[a-zA-Z]*$/.test(value)) {
+                  handleInputChange(viewIndex, value); // Atualiza o estado apenas se for uma letra
+                }
+              }}
               maxLength={1}
+              editable={linha == 0}
             />
           </View>
         ))}
       </View>
+
+      <View style={{ flexDirection: 'row', marginTop: 5 }}>
+        {views.map((viewIndex) => (
+          <View
+
+            key={viewIndex}
+            style={[getRectangleStyle(rowSet1[viewIndex]), { justifyContent: 'center', alignItems: 'center' }]}
+          >
+            <TextInput
+              style={[styles.input, { width: '70%', textAlign: 'center' }]}
+              placeholder="-"
+              value={inputText1[viewIndex] || ''}
+              onChangeText={(value) => {
+                // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
+                if (/^[a-zA-Z]*$/.test(value)) {
+                  handleInputChange(viewIndex, value); // Atualiza o estado apenas se for uma letra
+                }
+              }}
+              maxLength={1}
+              editable={linha == 1}
+            />
+          </View>
+        ))}
+      </View>
+
+
 
       <TryButton title="Chutar" onPress={() => checkWordFill()} />
 
