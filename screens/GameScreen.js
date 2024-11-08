@@ -1,4 +1,4 @@
-import { View, Text, Button, TextInput, TouchableOpacity, Alert, ToastAndroid, Animated, Modal } from 'react-native';
+import { View, Text, Button, TextInput, TouchableOpacity, Animated, Modal, Keyboard, Vibration  } from 'react-native';
 import FlashMessage, { positionStyle } from 'react-native-flash-message';
 import { showMessage } from 'react-native-flash-message';
 import React, { useState, useEffect, useRef } from 'react';
@@ -35,6 +35,22 @@ export default function GameScreen({ navigation }) {
   const [palavraSecreta, setPalavraSecreta] = useState('');
   console.log(palavraSecreta);
 
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    // Limpeza dos listeners ao desmontar o componente
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
   const flipAnim = useRef(new Animated.Value(0)).current;
 
   const flipCard = () => {
@@ -60,6 +76,7 @@ export default function GameScreen({ navigation }) {
   const handleGameOver = () => {
     setGameOver(true);
     setModalVisible(true);
+    Vibration.vibrate(1000);
   }
 
   const handleReset = () => {
@@ -157,23 +174,27 @@ export default function GameScreen({ navigation }) {
     }
   };
 
-  const atualizarRowSet = (letra, index, novoRowSet) => {
-    let letra_encontrada = false;
+  const atualizarRowSet = (letra, index, novoRowSet , letras_encontradas, set) => {
+
+    if(set == 0)
+      novoRowSet[index] = 3;
+
     for (let i = 0; i < palavraSecreta.length; i++) {
-      if (palavraSecreta[i] === letra) {
-        if (index === i) {
-          novoRowSet[index] = 2;
-          letra_encontrada = true;
-        } else {
+      if(set === 0){
+        if (palavraSecreta[i] === letra && index === i) {
+            novoRowSet[index] = 2;
+            letras_encontradas.push(letra);
+            console.log(letras_encontradas);
+        } 
+      } 
+
+      if(set === 1){
+        if (palavraSecreta[i] === letra && index !== i && !letras_encontradas.includes(letra)) {
           novoRowSet[index] = 1;
-          letra_encontrada = true;
+          console.log(letra);
         }
-      } else {
-        if (!letra_encontrada)
-          novoRowSet[index] = 3;
-      }
-    }
-  };
+      } 
+   }};
 
   const getRectangleStyle = (tipo) => {
     switch (tipo) {
@@ -231,9 +252,9 @@ export default function GameScreen({ navigation }) {
     } else {
       showMessage({
         message: "Palavra Incompleta!",
-        description: "Muito burro",
         type: "warning",
       });
+      Vibration.vibrate();
     }
 
   }
@@ -258,10 +279,15 @@ export default function GameScreen({ navigation }) {
       setGameWin(true);
       handleGameOver();
     } else {
-      const novoRowSet = [...rowSet];
+      const novoRowSet = [0,0,0,0,0];
+
+      let letras_encontradas = [];
+      word.split('').forEach((caractere, index) => {
+        atualizarRowSet(caractere, index, novoRowSet, letras_encontradas, 0);
+      });
 
       word.split('').forEach((caractere, index) => {
-        atualizarRowSet(caractere, index, novoRowSet);
+        atualizarRowSet(caractere, index, novoRowSet, letras_encontradas, 1);
       });
 
       handleRowSet(novoRowSet, linha);
@@ -277,7 +303,7 @@ export default function GameScreen({ navigation }) {
 
   //VIEW
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginBottom: keyboardVisible ? 0 : 250}}>
 
 
       <Modal
@@ -293,15 +319,15 @@ export default function GameScreen({ navigation }) {
 
             <View style={{ flexDirection: 'row', marginTop: 5 }}>
               <View style={{ marginRight: 10 }}>
-                <TryButton title="Reinicar" onPress={() => handleReset()} />
+                <TryButton title="Jogar novamente" onPress={() => handleReset()} />
               </View>
-              <TryButton title="Sair" onPress={() => setModalVisible(false)} />
+              <TryButton title="X" onPress={() => setModalVisible(false)} />
             </View>
           </View>
         </View>
       </Modal>
 
-      <Text> {palavraSecreta}</Text>
+      {/* <Text> {palavraSecreta}</Text> */}
 
       <View style={{ flexDirection: 'row', marginTop: 5 }}>
         {views.map((viewIndex) => (
@@ -423,8 +449,6 @@ export default function GameScreen({ navigation }) {
         ))}
       </View>
 
-
-
       <TryButton title="Chutar" onPress={() => !gameOver && checkWordFill()} />
 
       <FlashMessage position="top" />
@@ -437,7 +461,7 @@ const styles = StyleSheet.create({
   rectangle: {
     width: 60,
     height: 60,
-    marginHorizontal: 2,
+    marginHorizontal: 1.5,
     backgroundColor: '#EFEFEF',
     borderWidth: 2,
     borderColor: '#000000',
@@ -448,7 +472,7 @@ const styles = StyleSheet.create({
   rectangleGray: {
     width: 60,
     height: 60,
-    marginHorizontal: 2,
+    marginHorizontal: 1.5,
     backgroundColor: '#9C9C9C',
     borderWidth: 2,
     borderColor: '#000000',
@@ -459,7 +483,7 @@ const styles = StyleSheet.create({
   rectanglePurple: {
     width: 60,
     height: 60,
-    marginHorizontal: 2,
+    marginHorizontal: 1.5,
     backgroundColor: '#7AB2D3', // Cor de fundo laranja
     borderWidth: 2,
     borderColor: '#000000',
@@ -470,7 +494,7 @@ const styles = StyleSheet.create({
   rectangleGreen: {
     width: 60,
     height: 60,
-    marginHorizontal: 2,
+    marginHorizontal: 1.5,
     backgroundColor: '#B1D690', // Cor de fundo verde
     borderWidth: 2,
     borderColor: '#000000',
