@@ -342,7 +342,7 @@ export default function GameScreen({ navigation }) {
               onChangeText={(value) => {
                 // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
                 if (/^[a-zA-Z]*$/.test(value)) {
-                  handleInputChange(viewIndex, value, linha); // Atualiza o estado apenas se for uma letra
+                  handleInputChange(viewIndex, value.toUpperCase(), linha); // Atualiza o estado apenas se for uma letra
                 }
               }}
               maxLength={1}
@@ -366,7 +366,7 @@ export default function GameScreen({ navigation }) {
               onChangeText={(value) => {
                 // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
                 if (/^[a-zA-Z]*$/.test(value)) {
-                  handleInputChange(viewIndex, value, linha); // Atualiza o estado apenas se for uma letra
+                  handleInputChange(viewIndex, value.toUpperCase(), linha); // Atualiza o estado apenas se for uma letra
                 }
               }}
               maxLength={1}
@@ -391,7 +391,7 @@ export default function GameScreen({ navigation }) {
               onChangeText={(value) => {
                 // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
                 if (/^[a-zA-Z]*$/.test(value)) {
-                  handleInputChange(viewIndex, value, linha); // Atualiza o estado apenas se for uma letra
+                  handleInputChange(viewIndex, value.toUpperCase(), linha); // Atualiza o estado apenas se for uma letra
                 }
               }}
               maxLength={1}
@@ -415,7 +415,7 @@ export default function GameScreen({ navigation }) {
               onChangeText={(value) => {
                 // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
                 if (/^[a-zA-Z]*$/.test(value)) {
-                  handleInputChange(viewIndex, value, linha); // Atualiza o estado apenas se for uma letra
+                  handleInputChange(viewIndex, value.toUpperCase(), linha); // Atualiza o estado apenas se for uma letra
                 }
               }}
               maxLength={1}
@@ -439,7 +439,7 @@ export default function GameScreen({ navigation }) {
               onChangeText={(value) => {
                 // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
                 if (/^[a-zA-Z]*$/.test(value)) {
-                  handleInputChange(viewIndex, value, linha); // Atualiza o estado apenas se for uma letra
+                  handleInputChange(viewIndex, value.toUpperCase(), linha); // Atualiza o estado apenas se for uma letra
                 }
               }}
               maxLength={1}
