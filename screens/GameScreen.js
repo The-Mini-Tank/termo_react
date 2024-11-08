@@ -29,6 +29,8 @@ export default function GameScreen({ navigation }) {
   const [inputText4, setInputText4] = useState(['', '', '', '', '']);
 
   const inputList = [inputText, inputText1, inputText2, inputText3, inputText4];
+  const inputRefs = useRef([...Array(5)].map(() => Array(5).fill(null)));
+
 
   const [views, setViews] = useState(Array.from({ length: initialViewCount }, (_, i) => i));
 
@@ -136,6 +138,12 @@ export default function GameScreen({ navigation }) {
   }
 
   const handleInputChange = (index, value, ln) => {
+
+
+    if (value && index < 4) {
+      inputRefs.current[ln][index + 1]?.focus();
+    }
+
 
     if (ln === 0) {
       setInputText(inputText => {
@@ -336,6 +344,7 @@ export default function GameScreen({ navigation }) {
             style={[getRectangleStyle(rowSet[viewIndex]), { justifyContent: 'center', alignItems: 'center' }, linha === 1 ? { transform: [{ rotateX }] } : {}]}
           >
             <TextInput
+              ref={(ref) => (inputRefs.current[0][viewIndex] = ref)}
               style={[styles.input, { width: '70%', textAlign: 'center', color: '#000' }]}
               placeholder=""
               value={inputText[viewIndex] || ''}
@@ -360,6 +369,7 @@ export default function GameScreen({ navigation }) {
             style={[getRectangleStyle(rowSet1[viewIndex]), { justifyContent: 'center', alignItems: 'center' }, linha === 2 ? { transform: [{ rotateX }] } : {}]}
           >
             <TextInput
+              ref={(ref) => (inputRefs.current[1][viewIndex] = ref)}
               style={[styles.input, { width: '70%', textAlign: 'center', color: '#000' }]}
               placeholder=""
               value={inputText1[viewIndex] || ''}
@@ -384,6 +394,7 @@ export default function GameScreen({ navigation }) {
             style={[getRectangleStyle(rowSet2[viewIndex]), { justifyContent: 'center', alignItems: 'center' }, linha === 3 ? { transform: [{ rotateX }] } : {}]}
           >
             <TextInput
+              ref={(ref) => (inputRefs.current[2][viewIndex] = ref)}
               key={`line-${viewIndex}`}
               style={[styles.input, { width: '70%', textAlign: 'center', color: '#000' }]}
               placeholder=""
@@ -409,6 +420,7 @@ export default function GameScreen({ navigation }) {
             style={[getRectangleStyle(rowSet3[viewIndex]), { justifyContent: 'center', alignItems: 'center' }, linha === 4 ? { transform: [{ rotateX }] } : {}]}
           >
             <TextInput
+              ref={(ref) => (inputRefs.current[3][viewIndex] = ref)}
               style={[styles.input, { width: '70%', textAlign: 'center', color: '#000' }]}
               placeholder=""
               value={inputText3[viewIndex] || ''}
@@ -433,6 +445,7 @@ export default function GameScreen({ navigation }) {
             style={[getRectangleStyle(rowSet4[viewIndex]), { justifyContent: 'center', alignItems: 'center' }, linha - 1 == 4 ? { transform: [{ rotateX }] } : {}]}
           >
             <TextInput
+              ref={(ref) => (inputRefs.current[4][viewIndex] = ref)}
               style={[styles.input, { width: '70%', textAlign: 'center', color: '#000' }]}
               placeholder=""
               value={inputText4[viewIndex] || ''}
