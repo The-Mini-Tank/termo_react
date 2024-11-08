@@ -4,10 +4,10 @@ import { showMessage } from 'react-native-flash-message';
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import dict from '../dict.json';
-
+import { useRouter } from 'expo-router';
 
 export default function GameScreen() {
-
+  const router = useRouter();
   const [linha, setLinha] = useState(0);
   const initialViewCount = 5;
   const [gameOver, setGameOver] = useState(false);
@@ -313,6 +313,12 @@ export default function GameScreen() {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginBottom: keyboardVisible ? 0 : 250}}>
 
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => router.push('/')}
+      >
+        <Text style={styles.backButtonText}>{" Voltar"}</Text>
+      </TouchableOpacity>
 
       <Modal
         animationType="slide" // Tipo de animação ("slide", "fade" ou "none")
@@ -471,6 +477,30 @@ export default function GameScreen() {
 }
 
 const styles = StyleSheet.create({
+
+  backButton: {
+    position: 'absolute',
+    height: 25,
+    width: 40,
+    top: 10,
+    left: 20,
+    padding: 2,
+    
+    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 3,
+    elevation: 2, // Android shadow
+    justifyContent: 'center',
+  },
+  backButtonText: {
+    color: '#000',
+    fontSize: 10,
+  },
+
   rectangle: {
     width: 60,
     height: 60,
