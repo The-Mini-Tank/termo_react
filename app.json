@@ -18,10 +18,19 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.ligmaedu.termo"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f4d1883f-6f49-49e8-90da-18a8b7845189"
+      }
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }

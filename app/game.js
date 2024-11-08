@@ -1,12 +1,12 @@
-import { View, Text, Button, TextInput, TouchableOpacity, Animated, Modal, Keyboard, Vibration  } from 'react-native';
-import FlashMessage, { positionStyle } from 'react-native-flash-message';
+import { View, Text, TextInput, TouchableOpacity, Animated, Modal, Keyboard, Vibration  } from 'react-native';
+import FlashMessage from 'react-native-flash-message';
 import { showMessage } from 'react-native-flash-message';
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import dict from '../dict.json';
 
 
-export default function GameScreen({ navigation }) {
+export default function GameScreen() {
 
   const [linha, setLinha] = useState(0);
   const initialViewCount = 5;
