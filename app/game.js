@@ -95,7 +95,7 @@ export default function GameScreen() {
 
     for (let i = 0; i <= 4; i++) {
       for (let j = 0; j <= 4; j++) {
-        handleInputChange(j, '', i);
+        handleInputChange(j, '', i, false);
       }
     }
   }
@@ -111,8 +111,6 @@ export default function GameScreen() {
   }, []);
 
   useEffect(() => {
-    console.log("Estado atualizado de rowSet:", rowSet);
-    console.log("Estado atualizado de linha:", linha);
   }, [rowSet]);
 
   const addView = () => {
@@ -137,13 +135,28 @@ export default function GameScreen() {
     }
   }
 
-  const handleInputChange = (index, value, ln) => {
+  const handleInputChange = (index, value, ln, mover = true) => {
 
-
-    if (value && index < 4) {
-      inputRefs.current[ln][index + 1]?.focus();
+    if(value.length > 1){
+      value = value[1];
+      if(index < 4 && inputRefs.current[ln][index + 1].value == '')
+        index += 1;
     }
 
+    if(value == '' && inputList[ln][index] != '' && inputList[ln][index] != ' ' && index < 4 && index > 0 && mover){
+      value = ' '; 
+      console.log('blank_detect');
+    }
+
+    if(mover){
+      if (value != '' && value != ' ' && index < 4) {
+        inputRefs.current[ln][index + 1]?.focus();
+      }
+
+      if(value == '' && index > 0){
+        inputRefs.current[ln][index - 1]?.focus();
+      }
+    }
 
     if (ln === 0) {
       setInputText(inputText => {
@@ -180,6 +193,9 @@ export default function GameScreen() {
         return newInputText;
       });
     }
+
+    console.log([value, inputList[ln][index]]);
+
   };
 
   const atualizarRowSet = (letra, index, novoRowSet , letras_encontradas, set) => {
@@ -192,14 +208,12 @@ export default function GameScreen() {
         if (palavraSecreta[i] === letra && index === i) {
             novoRowSet[index] = 2;
             letras_encontradas.push(letra);
-            console.log(letras_encontradas);
         } 
       } 
 
       if(set === 1){
         if (palavraSecreta[i] === letra && index !== i && !letras_encontradas.includes(letra)) {
           novoRowSet[index] = 1;
-          console.log(letra);
         }
       } 
    }};
@@ -249,8 +263,6 @@ export default function GameScreen() {
     let actualInput = inputList[linha];
 
     const concatenatedString = actualInput.join('');
-    console.log(concatenatedString);
-    console.log(linha);
 
     let textoFormatado = formatarTexto(concatenatedString);
 
@@ -335,7 +347,7 @@ export default function GameScreen() {
               <View style={{ marginRight: 10 }}>
                 <TryButton title="Jogar novamente" onPress={() => handleReset()} />
               </View>
-              <TryButton title="X" onPress={() => setModalVisible(false)} />
+              <TryButton title="X" onPress={() => setModalVisible(true)} />
             </View>
           </View>
         </View>
@@ -353,14 +365,21 @@ export default function GameScreen() {
               ref={(ref) => (inputRefs.current[0][viewIndex] = ref)}
               style={[styles.input, { width: '70%', textAlign: 'center', color: '#000' }]}
               placeholder=""
-              value={inputText[viewIndex] || ''}
+              value={ inputText[viewIndex] || ''}
               onChangeText={(value) => {
-                // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
-                if (/^[a-zA-Z]*$/.test(value)) {
-                  handleInputChange(viewIndex, value.toUpperCase(), linha); // Atualiza o estado apenas se for uma letra
+                if (/^[a-zA-Z\s]*$/.test(value)) {
+                  handleInputChange(viewIndex, value.toUpperCase(), linha); 
                 }
               }}
-              maxLength={1}
+              onBlur={() => {
+                if (inputText[viewIndex] === ' ') {
+                  handleInputChange(viewIndex, '', linha, false); // Limpa o valor se for um espaço
+                  console.log('Valor era um espaço, agora limpo');
+                }// Atualiza o estado apenas se for uma letra
+                // Qualquer ação que você queira realizar quando o campo perde o foco
+              }}
+              selection={{ start: 2, end: 2}}
+              maxLength={2}
               editable={linha == 0 && !gameOver}
             />
           </Animated.View>
