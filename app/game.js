@@ -296,8 +296,10 @@ export default function GameScreen() {
       novoRowSet = [2, 2, 2, 2, 2];
       handleRowSet(novoRowSet, linha);
 
-      setGameWin(true);
-      handleGameOver();
+        setTimeout(() => {
+        setGameWin(true);
+        handleGameOver();
+      }, 700);
     } else {
       const novoRowSet = [0,0,0,0,0];
 
@@ -316,7 +318,14 @@ export default function GameScreen() {
       flipCard();
   
       if (linha == 4) {
-        handleGameOver();
+        showMessage({
+          message: "DERROTA!",
+          description: "",
+          type: "danger",
+        });
+        setTimeout(() => {
+          handleGameOver();
+        }, 700);
       }
     }
   }
@@ -347,7 +356,7 @@ export default function GameScreen() {
               <View style={{ marginRight: 10 }}>
                 <TryButton title="Jogar novamente" onPress={() => handleReset()} />
               </View>
-              <TryButton title="X" onPress={() => setModalVisible(true)} />
+              <TryButton title="X" onPress={() => setModalVisible(false)} />
             </View>
           </View>
         </View>
@@ -373,10 +382,8 @@ export default function GameScreen() {
               }}
               onBlur={() => {
                 if (inputText[viewIndex] === ' ') {
-                  handleInputChange(viewIndex, '', linha, false); // Limpa o valor se for um espaço
-                  console.log('Valor era um espaço, agora limpo');
-                }// Atualiza o estado apenas se for uma letra
-                // Qualquer ação que você queira realizar quando o campo perde o foco
+                  handleInputChange(viewIndex, '', linha, false);
+                }
               }}
               selection={{ start: 2, end: 2}}
               maxLength={2}
@@ -399,12 +406,16 @@ export default function GameScreen() {
               placeholder=""
               value={inputText1[viewIndex] || ''}
               onChangeText={(value) => {
-                // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
-                if (/^[a-zA-Z]*$/.test(value)) {
-                  handleInputChange(viewIndex, value.toUpperCase(), linha); // Atualiza o estado apenas se for uma letra
+                if (/^[a-zA-Z\s]*$/.test(value)) {
+                  handleInputChange(viewIndex, value.toUpperCase(), linha); 
                 }
               }}
-              maxLength={1}
+              onBlur={() => {
+                if (inputText1[viewIndex] === ' ') {
+                  handleInputChange(viewIndex, '', linha, false);
+                }
+              }}
+              maxLength={2}
               editable={linha == 1 && !gameOver}
             />
           </Animated.View>
@@ -425,12 +436,16 @@ export default function GameScreen() {
               placeholder=""
               value={inputText2[viewIndex] || ''}
               onChangeText={(value) => {
-                // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
-                if (/^[a-zA-Z]*$/.test(value)) {
-                  handleInputChange(viewIndex, value.toUpperCase(), linha); // Atualiza o estado apenas se for uma letra
+                if (/^[a-zA-Z\s]*$/.test(value)) {
+                  handleInputChange(viewIndex, value.toUpperCase(), linha); 
                 }
               }}
-              maxLength={1}
+              onBlur={() => {
+                if (inputText2[viewIndex] === ' ') {
+                  handleInputChange(viewIndex, '', linha, false);
+                }
+              }}
+              maxLength={2}
               editable={linha == 2 && !gameOver}
             />
           </Animated.View>
@@ -450,12 +465,16 @@ export default function GameScreen() {
               placeholder=""
               value={inputText3[viewIndex] || ''}
               onChangeText={(value) => {
-                // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
-                if (/^[a-zA-Z]*$/.test(value)) {
-                  handleInputChange(viewIndex, value.toUpperCase(), linha); // Atualiza o estado apenas se for uma letra
+                if (/^[a-zA-Z\s]*$/.test(value)) {
+                  handleInputChange(viewIndex, value.toUpperCase(), linha); 
                 }
               }}
-              maxLength={1}
+              onBlur={() => {
+                if (inputText3[viewIndex] === ' ') {
+                  handleInputChange(viewIndex, '', linha, false);
+                }
+              }}
+              maxLength={2}
               editable={linha == 3 && !gameOver}
             />
           </Animated.View>
@@ -475,12 +494,16 @@ export default function GameScreen() {
               placeholder=""
               value={inputText4[viewIndex] || ''}
               onChangeText={(value) => {
-                // Verifica se o valor é apenas letras (sem números ou caracteres especiais)
-                if (/^[a-zA-Z]*$/.test(value)) {
-                  handleInputChange(viewIndex, value.toUpperCase(), linha); // Atualiza o estado apenas se for uma letra
+                if (/^[a-zA-Z\s]*$/.test(value)) {
+                  handleInputChange(viewIndex, value.toUpperCase(), linha); 
                 }
               }}
-              maxLength={1}
+              onBlur={() => {
+                if (inputText4[viewIndex] === ' ') {
+                  handleInputChange(viewIndex, '', linha, false);
+                }
+              }}
+              maxLength={2}
               editable={linha == 4 && !gameOver}
             />
           </Animated.View>
