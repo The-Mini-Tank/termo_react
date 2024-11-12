@@ -6,16 +6,23 @@ import { StyleSheet } from 'react-native';
 import dict from '../dict.json';
 import { useRouter } from 'expo-router';
 
+import Teclado from './teclado.js';
+export const alphabet_set = Array(26).fill(0);
+
+
 export default function GameScreen() {
   const router = useRouter();
   const [linha, setLinha] = useState(0);
   const initialViewCount = 5;
   const [gameOver, setGameOver] = useState(false);
   const [gameWin, setGameWin] = useState(false);
-  // Número inicial de Views
 
   const [modalVisible, setModalVisible] = useState(false);
 
+  const alphabet = [
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+];
 
   const [rowSet, setRowSet] = useState([0, 0, 0, 0, 0]);
   const [inputText, setInputText] = useState(['', '', '', '', '']);
@@ -88,6 +95,7 @@ export default function GameScreen() {
     setPalavraSecreta(escolherPalavraAleatoria());
     setLinha(0);
     let novoRowSet = [0, 0, 0, 0, 0];
+    alphabet_set.fill(0);
 
     for (let i = 0; i <= 4; i++) {
       handleRowSet(novoRowSet, i);
@@ -95,7 +103,7 @@ export default function GameScreen() {
 
     for (let i = 0; i <= 4; i++) {
       for (let j = 0; j <= 4; j++) {
-        handleInputChange(j, '', i, false);
+        handleInputChange(j, '', i, false, true);
       }
     }
   }
@@ -135,21 +143,18 @@ export default function GameScreen() {
     }
   }
 
-  const handleInputChange = (index, value, ln, mover = true) => {
+  const handleInputChange = (index, value, ln, mover = true, reset = false) => {
 
     if(value.length > 1){
       value = value[1];
-      if(index < 4 && inputRefs.current[ln][index + 1].value == '')
-        index += 1;
     }
 
-    if(value == '' && inputList[ln][index] != '' && inputList[ln][index] != ' ' && index < 4 && index > 0 && mover){
-      value = ' '; 
-      console.log('blank_detect');
+    if(value == '' && !['', ' '].includes(inputList[ln][index])){ 
+      value = ' ';
     }
-
+    
     if(mover){
-      if (value != '' && value != ' ' && index < 4) {
+      if (!['', ' '].includes(value) && index < 4) {
         inputRefs.current[ln][index + 1]?.focus();
       }
 
@@ -157,6 +162,9 @@ export default function GameScreen() {
         inputRefs.current[ln][index - 1]?.focus();
       }
     }
+
+    if(reset == true)
+      value = '';
 
     if (ln === 0) {
       setInputText(inputText => {
@@ -198,24 +206,39 @@ export default function GameScreen() {
 
   };
 
+  const atualizaTeclado = (letra, peso) => {
+      alphabet.forEach((letter, index) => {
+        console.log(letra);
+        if (letter.toLocaleLowerCase() == letra && alphabet_set[index] != 2){ 
+          alphabet_set[index] = peso;
+        }
+      });
+  }
+
   const atualizarRowSet = (letra, index, novoRowSet , letras_encontradas, set) => {
 
-    if(set == 0)
+    if(set == 0){ 
       novoRowSet[index] = 3;
+      atualizaTeclado(letra, 3);
+    }
 
     for (let i = 0; i < palavraSecreta.length; i++) {
       if(set === 0){
         if (palavraSecreta[i] === letra && index === i) {
             novoRowSet[index] = 2;
             letras_encontradas.push(letra);
+            atualizaTeclado(letra, 2);
         } 
       } 
 
       if(set === 1){
         if (palavraSecreta[i] === letra && index !== i && !letras_encontradas.includes(letra)) {
           novoRowSet[index] = 1;
+          atualizaTeclado(letra, 1);
         }
-      } 
+      }
+      
+      console.log(alphabet_set);
    }};
 
   const getRectangleStyle = (tipo) => {
@@ -293,6 +316,9 @@ export default function GameScreen() {
         type: "success",
       });
 
+      let novaLinha = linha + 1;
+      setLinha(novaLinha);
+      flipCard();
       novoRowSet = [2, 2, 2, 2, 2];
       handleRowSet(novoRowSet, linha);
 
@@ -332,7 +358,7 @@ export default function GameScreen() {
 
   //VIEW
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginBottom: keyboardVisible ? 0 : 250}}>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginBottom: keyboardVisible ? 0 : 150}}>
 
       <TouchableOpacity
         style={styles.backButton}
@@ -380,6 +406,11 @@ export default function GameScreen() {
                   handleInputChange(viewIndex, value.toUpperCase(), linha); 
                 }
               }}
+              onFocus={() => {
+                if (inputText[viewIndex] === '') {
+                  handleInputChange(viewIndex, ' ', linha, false);
+                }
+              }}
               onBlur={() => {
                 if (inputText[viewIndex] === ' ') {
                   handleInputChange(viewIndex, '', linha, false);
@@ -410,8 +441,13 @@ export default function GameScreen() {
                   handleInputChange(viewIndex, value.toUpperCase(), linha); 
                 }
               }}
+              onFocus={() => {
+                if (inputText1[viewIndex] === '' && linha == 1) {
+                  handleInputChange(viewIndex, ' ', linha, false);
+                }
+              }}
               onBlur={() => {
-                if (inputText1[viewIndex] === ' ') {
+                if (inputText1[viewIndex] === ' ' && linha == 1) {
                   handleInputChange(viewIndex, '', linha, false);
                 }
               }}
@@ -440,11 +476,17 @@ export default function GameScreen() {
                   handleInputChange(viewIndex, value.toUpperCase(), linha); 
                 }
               }}
+              onFocus={() => {
+                if (inputText2[viewIndex] === '' && linha == 2) {
+                  handleInputChange(viewIndex, ' ', linha, false);
+                }
+              }}
               onBlur={() => {
-                if (inputText2[viewIndex] === ' ') {
+                if (inputText2[viewIndex] === ' ' && linha == 2) {
                   handleInputChange(viewIndex, '', linha, false);
                 }
               }}
+              selection={{ start: 2, end: 2}}
               maxLength={2}
               editable={linha == 2 && !gameOver}
             />
@@ -469,11 +511,17 @@ export default function GameScreen() {
                   handleInputChange(viewIndex, value.toUpperCase(), linha); 
                 }
               }}
+              onFocus={() => {
+                if (inputText3[viewIndex] === '' && linha == 3) {
+                  handleInputChange(viewIndex, ' ', linha, false);
+                }
+              }}
               onBlur={() => {
-                if (inputText3[viewIndex] === ' ') {
+                if (inputText3[viewIndex] === ' ' && linha == 3) {
                   handleInputChange(viewIndex, '', linha, false);
                 }
               }}
+              selection={{ start: 2, end: 2}}
               maxLength={2}
               editable={linha == 3 && !gameOver}
             />
@@ -498,11 +546,17 @@ export default function GameScreen() {
                   handleInputChange(viewIndex, value.toUpperCase(), linha); 
                 }
               }}
+              onFocus={() => {
+                if (inputText4[viewIndex] === '' && linha == 4) {
+                  handleInputChange(viewIndex, ' ', linha, false);
+                }
+              }}
               onBlur={() => {
-                if (inputText4[viewIndex] === ' ') {
+                if (inputText4[viewIndex] === ' ' && linha == 4) {
                   handleInputChange(viewIndex, '', linha, false);
                 }
               }}
+              selection={{ start: 2, end: 2}}
               maxLength={2}
               editable={linha == 4 && !gameOver}
             />
@@ -511,6 +565,7 @@ export default function GameScreen() {
       </View>
 
       <TryButton title="Chutar" onPress={() => !gameOver && checkWordFill()} />
+      <Teclado/>
 
       <FlashMessage position="top" />
       {/* Códigos sempre dentro da view */}
@@ -547,10 +602,10 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     marginHorizontal: 1.5,
-    backgroundColor: '#EFEFEF',
-    borderWidth: 2,
+    backgroundColor: '#c9c9c9',
+    borderWidth: 0,
     borderColor: '#000000',
-    borderRadius: 10,
+    borderRadius: 5,
     boxSizing: 'border-box',
   },
 
@@ -559,9 +614,9 @@ const styles = StyleSheet.create({
     height: 60,
     marginHorizontal: 1.5,
     backgroundColor: '#9C9C9C',
-    borderWidth: 2,
+    borderWidth: 0,
     borderColor: '#000000',
-    borderRadius: 10,
+    borderRadius: 5,
     boxSizing: 'border-box',
   },
 
@@ -570,9 +625,9 @@ const styles = StyleSheet.create({
     height: 60,
     marginHorizontal: 1.5,
     backgroundColor: '#7AB2D3', // Cor de fundo laranja
-    borderWidth: 2,
+    borderWidth: 0,
     borderColor: '#000000',
-    borderRadius: 10,
+    borderRadius: 5,
     boxSizing: 'border-box',
   },
 
@@ -581,9 +636,9 @@ const styles = StyleSheet.create({
     height: 60,
     marginHorizontal: 1.5,
     backgroundColor: '#B1D690', // Cor de fundo verde
-    borderWidth: 2,
+    borderWidth: 0,
     borderColor: '#000000',
-    borderRadius: 10,
+    borderRadius: 5,
     boxSizing: 'border-box',
   },
 
