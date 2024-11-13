@@ -115,15 +115,11 @@ export default function GameScreen() {
 
   // Palavra secreta
   useEffect(() => {
-    setPalavraSecreta(escolherPalavraAleatoria());
+    setPalavraSecreta("corvo");
   }, []);
 
   useEffect(() => {
   }, [rowSet]);
-
-  const addView = () => {
-    setViews([...views, views.length]);
-  };
 
   const handleRowSet = (novoRowSet, ln) => {
     if (ln == 0) {
@@ -202,13 +198,10 @@ export default function GameScreen() {
       });
     }
 
-    console.log([value, inputList[ln][index]]);
-
   };
 
   const atualizaTeclado = (letra, peso) => {
       alphabet.forEach((letter, index) => {
-        console.log(letra);
         if (letter.toLocaleLowerCase() == letra && alphabet_set[index] != 2){ 
           alphabet_set[index] = peso;
         }
@@ -224,21 +217,29 @@ export default function GameScreen() {
 
     for (let i = 0; i < palavraSecreta.length; i++) {
       if(set === 0){
+        if(palavraSecreta[i] === letra){
+          if (!letras_encontradas.some(item => item[1] === i)) {
+            letras_encontradas.push([letra, i]);
+          }
+        }
         if (palavraSecreta[i] === letra && index === i) {
             novoRowSet[index] = 2;
-            letras_encontradas.push(letra);
             atualizaTeclado(letra, 2);
-        } 
+        }
       } 
 
       if(set === 1){
-        if (palavraSecreta[i] === letra && index !== i && !letras_encontradas.includes(letra)) {
-          novoRowSet[index] = 1;
-          atualizaTeclado(letra, 1);
+        if (palavraSecreta[i] === letra && index !== i) {
+          console.log(index);
+          letras_encontradas.forEach( item => {
+            const [x, y] = item;
+            if(y !== index){
+              novoRowSet[index] = 1;
+              atualizaTeclado(letra, 1);
+            }
+          });
         }
-      }
-      
-      console.log(alphabet_set);
+      }      
    }};
 
   const getRectangleStyle = (tipo) => {
@@ -258,7 +259,8 @@ export default function GameScreen() {
     return texto
       .toLowerCase()
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "");
   }
 
   // Configurar Botão
@@ -304,7 +306,7 @@ export default function GameScreen() {
 
   useEffect(() => {
     if (linha in [1,2,3,4,5]) {
-      flipCard(); // Inicie a animação apenas para a linha específica
+      flipCard();
     }
   }, [linha]);
 
@@ -333,6 +335,8 @@ export default function GameScreen() {
       word.split('').forEach((caractere, index) => {
         atualizarRowSet(caractere, index, novoRowSet, letras_encontradas, 0);
       });
+
+      console.log(letras_encontradas);
 
       word.split('').forEach((caractere, index) => {
         atualizarRowSet(caractere, index, novoRowSet, letras_encontradas, 1);

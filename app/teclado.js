@@ -10,9 +10,7 @@ import { alphabet_set } from './game.js'
 
 
 const Teclado = () => {
-
-    console.log(alphabet_set);
-
+    
     const alphabet = [
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
         'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
