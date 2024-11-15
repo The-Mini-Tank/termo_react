@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, Animated, Modal, Keyboard, Vibration  } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Animated, Modal, Keyboard, Vibration } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { showMessage } from 'react-native-flash-message';
 import React, { useState, useEffect, useRef } from 'react';
@@ -22,7 +22,7 @@ export default function GameScreen() {
   const alphabet = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
-];
+  ];
 
   const [rowSet, setRowSet] = useState([0, 0, 0, 0, 0]);
   const [inputText, setInputText] = useState(['', '', '', '', '']);
@@ -141,25 +141,25 @@ export default function GameScreen() {
 
   const handleInputChange = (index, value, ln, mover = true, reset = false) => {
 
-    if(value.length > 1){
+    if (value.length > 1) {
       value = value[1];
     }
 
-    if(value == '' && !['', ' '].includes(inputList[ln][index])){ 
+    if (value == '' && !['', ' '].includes(inputList[ln][index])) {
       value = ' ';
     }
-    
-    if(mover){
+
+    if (mover) {
       if (!['', ' '].includes(value) && index < 4) {
         inputRefs.current[ln][index + 1]?.focus();
       }
 
-      if(value == '' && index > 0){
+      if (value == '' && index > 0) {
         inputRefs.current[ln][index - 1]?.focus();
       }
     }
 
-    if(reset == true)
+    if (reset == true)
       value = '';
 
     if (ln === 0) {
@@ -201,46 +201,59 @@ export default function GameScreen() {
   };
 
   const atualizaTeclado = (letra, peso) => {
-      alphabet.forEach((letter, index) => {
-        if (letter.toLocaleLowerCase() == letra && alphabet_set[index] != 2){ 
-          alphabet_set[index] = peso;
-        }
-      });
+    alphabet.forEach((letter, index) => {
+      if (letter.toLocaleLowerCase() == letra && alphabet_set[index] != 2) {
+        alphabet_set[index] = peso;
+      }
+    });
   }
 
-  const atualizarRowSet = (letra, index, novoRowSet , letras_encontradas, set) => {
+  const novoAtualizaRowSet = (word, novoRowSet) => {
+    let palavra_digitada = word.split("");
+    let palavra_chave = palavraSecreta.split("");
+    let letras_descobertas = [];
 
-    if(set == 0){ 
-      novoRowSet[index] = 3;
-      atualizaTeclado(letra, 3);
-    }
+    palavra_digitada = palavra_digitada.map((valor, index) => [valor, index]);
+    palavra_chave = palavra_chave.map((valor, index) => [valor, index]);
 
-    for (let i = 0; i < palavraSecreta.length; i++) {
-      if(set === 0){
-        if(palavraSecreta[i] === letra){
-          if (!letras_encontradas.some(item => item[1] === i)) {
-            letras_encontradas.push([letra, i]);
+    for (let i = 0; i < palavra_chave.length; i++) {
+      novoRowSet[i] = 3;
+      atualizaTeclado(palavra_digitada[i][0], 3);
+
+      if (palavra_chave[i][0] == palavra_digitada[i][0] && palavra_chave[i][1] == palavra_digitada[i][1]) {
+        novoRowSet[i] = 2;
+        atualizaTeclado(palavra_digitada[i][0], 2);
+      }
+      else if (palavra_chave[i][0] != palavra_digitada[i][0]) {
+        let letras_restantes = 0;
+         
+        if(!letras_descobertas.includes(palavra_digitada[i][0])){
+          letras_restantes = contarletras(palavra_digitada[i][0], palavra_chave ,palavra_digitada);
+          letras_descobertas.push(palavra_digitada[i][0]);
+        }
+
+        for (let x = 0; x < palavra_chave.length; x++) {
+          if (letras_restantes > 0 && palavra_chave[x][0] == palavra_digitada[i][0] && palavra_chave[x][0] != palavra_digitada[x][0] ) {
+            novoRowSet[i] = 1;
+            atualizaTeclado(palavra_digitada[i][0], 1);
+            letras_restantes -= 1;
           }
         }
-        if (palavraSecreta[i] === letra && index === i) {
-            novoRowSet[index] = 2;
-            atualizaTeclado(letra, 2);
-        }
-      } 
+      }
+    }
+  }
 
-      if(set === 1){
-        if (palavraSecreta[i] === letra && index !== i) {
-          console.log(index);
-          letras_encontradas.forEach( item => {
-            const [x, y] = item;
-            if(y !== index){
-              novoRowSet[index] = 1;
-              atualizaTeclado(letra, 1);
-            }
-          });
-        }
-      }      
-   }};
+  const contarletras = ( letra , palavra_chave, palavra_digitada ) => {
+   
+    let letras = 0;
+    for (let i = 0; i < palavra_chave.length; i++) {
+       if(palavra_chave[i][0] != palavra_digitada[i][0] && palavra_digitada[i][0] == letra){ 
+          letras +=1;
+       }
+    }
+
+    return letras;
+  }
 
   const getRectangleStyle = (tipo) => {
     switch (tipo) {
@@ -305,7 +318,7 @@ export default function GameScreen() {
   }
 
   useEffect(() => {
-    if (linha in [1,2,3,4,5]) {
+    if (linha in [1, 2, 3, 4, 5]) {
       flipCard();
     }
   }, [linha]);
@@ -324,29 +337,20 @@ export default function GameScreen() {
       novoRowSet = [2, 2, 2, 2, 2];
       handleRowSet(novoRowSet, linha);
 
-        setTimeout(() => {
+      setTimeout(() => {
         setGameWin(true);
         handleGameOver();
       }, 700);
     } else {
-      const novoRowSet = [0,0,0,0,0];
+      const novoRowSet = [0, 0, 0, 0, 0];
 
-      let letras_encontradas = [];
-      word.split('').forEach((caractere, index) => {
-        atualizarRowSet(caractere, index, novoRowSet, letras_encontradas, 0);
-      });
-
-      console.log(letras_encontradas);
-
-      word.split('').forEach((caractere, index) => {
-        atualizarRowSet(caractere, index, novoRowSet, letras_encontradas, 1);
-      });
+      novoAtualizaRowSet(word, novoRowSet);
 
       handleRowSet(novoRowSet, linha);
       let novaLinha = linha + 1;
       setLinha(novaLinha);
       flipCard();
-  
+
       if (linha == 4) {
         showMessage({
           message: "DERROTA!",
@@ -362,7 +366,7 @@ export default function GameScreen() {
 
   //VIEW
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginBottom: keyboardVisible ? 0 : 150}}>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginBottom: keyboardVisible ? 0 : 150 }}>
 
       <TouchableOpacity
         style={styles.backButton}
@@ -379,8 +383,8 @@ export default function GameScreen() {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-          <Text style={styles.modalText}>{gameWin ? 'Vitória' : 'Derrota'}</Text>
-          <Text style={styles.modalText}>Palavra Secreta: {palavraSecreta}</Text>
+            <Text style={styles.modalText}>{gameWin ? 'Vitória' : 'Derrota'}</Text>
+            <Text style={styles.modalText}>Palavra Secreta: {palavraSecreta}</Text>
 
             <View style={{ flexDirection: 'row', marginTop: 5 }}>
               <View style={{ marginRight: 10 }}>
@@ -404,10 +408,10 @@ export default function GameScreen() {
               ref={(ref) => (inputRefs.current[0][viewIndex] = ref)}
               style={[styles.input, { width: '70%', textAlign: 'center', color: '#000' }]}
               placeholder=""
-              value={ inputText[viewIndex] || ''}
+              value={inputText[viewIndex] || ''}
               onChangeText={(value) => {
                 if (/^[a-zA-Z\s]*$/.test(value)) {
-                  handleInputChange(viewIndex, value.toUpperCase(), linha); 
+                  handleInputChange(viewIndex, value.toUpperCase(), linha);
                 }
               }}
               onFocus={() => {
@@ -420,7 +424,7 @@ export default function GameScreen() {
                   handleInputChange(viewIndex, '', linha, false);
                 }
               }}
-              selection={{ start: 2, end: 2}}
+              selection={{ start: 2, end: 2 }}
               maxLength={2}
               editable={linha == 0 && !gameOver}
             />
@@ -442,7 +446,7 @@ export default function GameScreen() {
               value={inputText1[viewIndex] || ''}
               onChangeText={(value) => {
                 if (/^[a-zA-Z\s]*$/.test(value)) {
-                  handleInputChange(viewIndex, value.toUpperCase(), linha); 
+                  handleInputChange(viewIndex, value.toUpperCase(), linha);
                 }
               }}
               onFocus={() => {
@@ -477,7 +481,7 @@ export default function GameScreen() {
               value={inputText2[viewIndex] || ''}
               onChangeText={(value) => {
                 if (/^[a-zA-Z\s]*$/.test(value)) {
-                  handleInputChange(viewIndex, value.toUpperCase(), linha); 
+                  handleInputChange(viewIndex, value.toUpperCase(), linha);
                 }
               }}
               onFocus={() => {
@@ -490,7 +494,7 @@ export default function GameScreen() {
                   handleInputChange(viewIndex, '', linha, false);
                 }
               }}
-              selection={{ start: 2, end: 2}}
+              selection={{ start: 2, end: 2 }}
               maxLength={2}
               editable={linha == 2 && !gameOver}
             />
@@ -512,7 +516,7 @@ export default function GameScreen() {
               value={inputText3[viewIndex] || ''}
               onChangeText={(value) => {
                 if (/^[a-zA-Z\s]*$/.test(value)) {
-                  handleInputChange(viewIndex, value.toUpperCase(), linha); 
+                  handleInputChange(viewIndex, value.toUpperCase(), linha);
                 }
               }}
               onFocus={() => {
@@ -525,7 +529,7 @@ export default function GameScreen() {
                   handleInputChange(viewIndex, '', linha, false);
                 }
               }}
-              selection={{ start: 2, end: 2}}
+              selection={{ start: 2, end: 2 }}
               maxLength={2}
               editable={linha == 3 && !gameOver}
             />
@@ -547,7 +551,7 @@ export default function GameScreen() {
               value={inputText4[viewIndex] || ''}
               onChangeText={(value) => {
                 if (/^[a-zA-Z\s]*$/.test(value)) {
-                  handleInputChange(viewIndex, value.toUpperCase(), linha); 
+                  handleInputChange(viewIndex, value.toUpperCase(), linha);
                 }
               }}
               onFocus={() => {
@@ -560,7 +564,7 @@ export default function GameScreen() {
                   handleInputChange(viewIndex, '', linha, false);
                 }
               }}
-              selection={{ start: 2, end: 2}}
+              selection={{ start: 2, end: 2 }}
               maxLength={2}
               editable={linha == 4 && !gameOver}
             />
@@ -569,7 +573,7 @@ export default function GameScreen() {
       </View>
 
       <TryButton title="Chutar" onPress={() => !gameOver && checkWordFill()} />
-      <Teclado/>
+      <Teclado />
 
       <FlashMessage position="top" />
       {/* Códigos sempre dentro da view */}
@@ -586,7 +590,7 @@ const styles = StyleSheet.create({
     top: 10,
     left: 20,
     padding: 2,
-    
+
     backgroundColor: '#FFFFFF',
     borderColor: 'rgba(0, 0, 0, 0.1)',
     borderWidth: 1,
